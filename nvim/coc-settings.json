@@ -1,0 +1,34 @@
+{
+"json.enable": true,
+"prettier.singleQuote": true,
+"javascript.preferences.quoteStyle": "single",
+"typescript.preferences.quoteStyle": "single",
+"javascript.suggestionActions.enabled": false,
+"coc.preferences.formatOnSaveFiletypes": ["rust", "javascript", "vue"],
+"vetur.format.enable": true,
+"prettier.proseWrap": "always",
+"rust-analyzer.cargo.allFeatures": true,
+"languageserver": {
+        "ccls": {
+            "command": "ccls",
+            "args":["--log-file=/tmp/ccls.log", "-v=1"],
+            "filetypes": [
+                "c",
+                "cpp",
+                "h",
+                "hpp"
+            ],
+            "rootPatterns": [
+                ".ccls",
+                "compile_commands.json",
+                ".vim/",
+                ".git/"
+            ],
+            "initializationOptions": {
+                "cache": {
+                    "directory": "/tmp/ccls"
+                }
+            }
+        }
+    }
+}

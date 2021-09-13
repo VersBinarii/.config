@@ -1,0 +1,13 @@
+# Autostart
+exec dropbox
+exec brave
+exec viber
+exec telegram-desktop
+exec slack
+exec thunderbird
+exec nm-applet --indicator
+exec mako
+exec netfluff
+
+exec udiskie -ans
+

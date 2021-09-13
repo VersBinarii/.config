@@ -1,0 +1,15 @@
+### Output configuration
+
+output * bg ~/Images/wallpapers/venom_logo.jpg fill
+
+
+
+output $disp_main {
+	resolution 1920x1080 
+	position 1920,0
+}
+
+output $disp_ext {
+	resolution 1920x1080 
+	position 0,0
+}

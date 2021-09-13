@@ -1,0 +1,11 @@
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+bar {
+    position top
+    status_command /usr/bin/i3status-rs ~/.config/i3status-rust/config.toml
+    gaps 2px
+}
+
+
