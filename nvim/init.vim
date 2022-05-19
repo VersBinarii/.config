@@ -12,8 +12,6 @@ if ! filereadable(system('echo -n "${XDG_CONFIG_HOME}/nvim/autoload/plug.vim"'))
 endif
 call plug#begin(system('echo -n "${XDG_CONFIG_HOME}/nvim/plugged"'))
 
-" Load plugins
-
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 
@@ -24,29 +22,9 @@ Plug 'junegunn/fzf.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'mattn/emmet-vim'
 
-" Python
-Plug 'vim-scripts/indentpython.vim'
-Plug 'Chiel92/vim-autoformat'
-Plug 'nvie/vim-flake8'
-
 Plug 'tpope/vim-surround'
 
-
-Plug 'neovim/nvim-lspconfig'
-" Completion framework
-Plug 'hrsh7th/nvim-cmp'
-" LSP completion source for nvim-cmp
-Plug 'hrsh7th/cmp-nvim-lsp'
-" Snippet completion source for nvim-cmp
-Plug 'hrsh7th/cmp-vsnip'
-" Other usefull completion sources
-Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/cmp-buffer'
-" See hrsh7th's other plugins for more completion sources!
-" To enable more of the features of rust-analyzer, such as inlay hints and more!
-Plug 'simrat39/rust-tools.nvim'
-" Snippet engine
-Plug 'hrsh7th/vim-vsnip'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Plug 'dense-analysis/ale'
 Plug 'cespare/vim-toml'
@@ -70,6 +48,10 @@ if has("termguicolors")
   set termguicolors
 endif
 
+if executable('rg')
+  let g:rg_derive_root='true'
+endif
+
 set background=dark
 colorscheme base16-gruvbox-dark-hard
 hi Normal ctermbg=NONE
@@ -89,134 +71,20 @@ let $RUST_SRC_PATH = systemlist("rustc --print sysroot")[0] . "/lib/rustlib/src/
 
 set completeopt=menuone,noinsert,noselect
 
-" See https://github.com/simrat39/rust-tools.nvim#configuration
-lua <<EOF
-local nvim_lsp = require'lspconfig'
-local on_attach = function(client, bufnr)
-    local function
-        buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...)
-    end
-    local function
-        buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...)
-    end
-
-    --Enable completion triggered by <c-x><c-o>
-    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-    -- Mappings.
-    local opts = { noremap=true, silent=true }
-
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-    buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-    buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-    buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-    buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-    buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-    buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-    buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-    buf_set_keymap('n', 'ga', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-    buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-    buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-    buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-    buf_set_keymap("n", "<space>fm", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-end
-
-local opts = {
-    tools = { -- rust-tools options
-        autoSetHints = true,
-        hover_with_actions = true,
-        inlay_hints = {
-            show_parameter_hints = true,
-            parameter_hints_prefix = "",
-            other_hints_prefix = "",
-        },
-    },
-
-    server = {
-	on_attach = on_attach,
-        settings = {
-            -- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
-            ["rust-analyzer"] = {
-                -- enable clippy on save
-                checkOnSave = {
-                    command = "clippy"
-                },
-            }
-        }
-    },
-}
-
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    virtual_text = true,
-    signs = true,
-    update_in_insert = true,
-  }
-)
-
-require('rust-tools').setup(opts)
-EOF
-
-" Setup Completion
-" See https://github.com/hrsh7th/nvim-cmp#basic-configuration
-lua <<EOF
-local cmp = require'cmp'
-cmp.setup({
-  -- Enable LSP snippets
-  snippet = {
-    expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  mapping = {
-    ['<S-Tab>'] = cmp.mapping.select_prev_item(),
-    ['<Tab>'] = cmp.mapping.select_next_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Insert,
-      select = true,
-    })
-  },
-
-  -- Installed sources
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'vsnip' },
-    { name = 'path' },
-    { name = 'buffer' },
-  },
-})
-EOF
-
 " Lightline
 
 function! LightlineFilename()
 	return expand('%:t') !=# '' ? @% : '[No Name]'
 endfunction
 
-function! LspStatus()
-	let sl = ''
-	if luaeval('not vim.tbl_isempty(vim.lsp.buf_get_clients(0))')
-		let sl.='E: '
-		let sl.=luaeval("vim.lsp.diagnostic.get_count(0, [[Error]])")
-		let sl.=' W: '
-		let sl.=luaeval("vim.lsp.diagnostic.get_count(0, [[Warning]])")
-      	endif
-      	return sl
+function! CurrentFunction()
+	return get(b:, "coc_current_function", "")
 endfunction
 
 let g:lightline = {
 	\ 'active':{
 	\ 	'left':[ ['mode', 'paste'],
-	\ 	['gitbranch','readonly', 'filename', 'modified', 'lspStatus'] ],
+	\ 	['gitbranch','readonly', 'filename', 'modified', 'currentfunction', 'status' ] ],
 	\
 	\ 	'right':[ ['lineinfo'],
 	\ 		['percent'],
@@ -226,9 +94,39 @@ let g:lightline = {
       	\ 'component_function': {
       	\   'filename': 'LightlineFilename',
 	\   'gitbranch': 'gitbranch#name',
-	\   'lspStatus': 'LspStatus'
+	\   'currentfunction':'CurrentFunction',
+	\   'status': 'coc#status'
       	\ },
 \ }
+
+" Coc navigation
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> <leader>l <Plug>(coc-diagnostic-info)
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gdd <Plug>(coc-declaration)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+nmap <silent> grr <Plug>(coc-rename)
+
+" Use K to show documentation in preview window
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Tab for navigation
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" use `:OR` for organize import of current buffer
+command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
+command! -nargs=0 Prettier :CocCommand prettier.formatFile
 
 
 " Emmet
@@ -246,9 +144,6 @@ set noshowmode " Lightline shows the mode instead
 set hidden
 set nowrap
 set nojoinspaces
-let g:vim_markdown_new_list_item_indent = 0
-let g:vim_markdown_auto_insert_bullets = 0
-let g:vim_markdown_frontmatter = 1
 set printfont=:h10
 set printencoding=utf-8
 set printoptions=paper:letter
@@ -258,6 +153,8 @@ set splitbelow
 set signcolumn=yes
 
 " Permanent undo
+set noswapfile
+set nobackup
 set undodir=~/.vimdid
 set undofile
 
@@ -283,9 +180,6 @@ set gdefault
 if has("autocmd")
  au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
-
-" Python
-let g:formatterpath = ['/usr/local/bin/autopep8']
 
 " =============================================================================
 " # GUI settings
@@ -318,7 +212,7 @@ set showcmd " Show (partial) command in status line.
 set mouse=a " Enable mouse usage (all modes) in terminals
 set shortmess+=c " don't give |ins-completion-menu| messages.
 
-let g:fzf_layout = { 'down': '~40%' }
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
 
 " display whitespace
 highlight BadWhitespace ctermbg=red guibg=darkred
@@ -326,21 +220,14 @@ au BufRead,BufNewFile *.py,*.rs,*.cpp,*.h,*.js,*.ts  match BadWhitespace /\s\+$/
 
 " JSON
 au! BufRead,BufNewFile *.json set filetype=json
-"autocmd FileType json autocmd BufWritePre <buffer> %!python -m json.tool
 
 " *script
 "autocmd FileType typescript setlocal formatprg=prettier\ --parser\ typescript shiftwidth=2 tabstop=2
 autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
 au BufNewFile,BufRead *.vue set tabstop=2 softtabstop=2 shiftwidth=2 textwidth=80 expandtab autoindent fileformat=unix 
-au BufNewFile,BufRead *.html set tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 expandtab autoindent fileformat=unix 
-
-" Python
-au BufNewFile,BufRead *.py set tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 expandtab autoindent fileformat=unix 
+au BufNewFile,BufRead *.html,*.py set tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 expandtab autoindent fileformat=unix 
 
 " C/C++
-map <C-K> :py3f /usr/share/clang/clang-format.py<cr>
-imap <C-K> <c-o>:py3f /usr/share/clang/clang-format.py<cr>
-
 autocmd FileType c,h,cpp setlocal equalprg=clang-format
 function! Formatonsave()
   	let l:formatdiff = 1
@@ -349,11 +236,11 @@ endfunction
 autocmd BufWritePre *.h,*.c,*.cpp call Formatonsave()
 
 " Copy into clipboard
-xnoremap <silent> <leader>c :w !wl-copy <cr><cr>
-noremap <leader>v :read !wl-paste --no-newline <cr><cr>
+xnoremap <silent> <leader>c :w !wl-copy -n <cr><cr>
+noremap <leader>v :read !wl-paste -n -t STRING<cr><cr>
 
 " Quick access files
-map <C-p> :Files<CR>
+map <C-p> :GFiles<CR>
 nmap <leader>; :Buffers<CR>
 
 " Quick-save
