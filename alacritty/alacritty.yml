@@ -28,17 +28,15 @@ window:
   # (change requires restart)
   padding:
     x: 5
-    y: 2
+    y: 5
 
   # Window decorations
   # Available values:
   # - `full`: Window with title bar and title bar buttons
   # - `none`: Window without title bar, rounded corners, or drop shadow
-  # - `transparent`: Window with title bar with transparent background and title
-  #   bar buttons
-  # - `buttonless`: Window with title bar with transparent background and no
-  #   title bar buttons
-  decorations: full
+  decorations: none
+
+  opacity: .7
 
 scrolling:
   # How many lines of scrollback to keep,
@@ -182,9 +180,6 @@ colors:
 bell:
   animation: EaseOutExpo
   duration: 1
-
-# Background opacity
-background_opacity: 0.9
 
 # Mouse bindings
 #
