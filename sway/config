@@ -195,8 +195,6 @@ gaps {
 	outer 2px
 }
 
-# I want keepass to always float
-for_window [title=".* - KeePass$"] floating enable
 # Dont kill screen when watching videos
 for_window [title=".*YouTube .*$"] inhibit_idle focus
 for_window [title=".* - mpv$"] inhibit_idle focus
