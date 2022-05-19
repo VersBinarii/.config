@@ -1,13 +1,18 @@
 # Autostart
 exec dropbox
 exec brave
-exec viber
 exec telegram-desktop
-exec slack
+#exec slack
 exec thunderbird
+
 exec nm-applet --indicator
 exec mako
+
+# Show when network degrades
 exec netfluff
 
+# Autoload USB drives
 exec udiskie -ans
 
+# Automate screen brightness control
+exec gammastep-indicator
